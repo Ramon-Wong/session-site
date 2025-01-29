@@ -2,17 +2,8 @@
 
 
 
-body {
-	font-family: sans-serif; 
-	line-height: 1.5; 
-	min-height: 100vh; 
-	background: #f3f3f3; 
-	display: flex; 
-	flex-direction: column; 
-	justify-content: center; 
-	align-items: center; 
-	margin: 0;
-  }
+body { font-family: sans-serif; line-height: 1.5; min-height: 100vh; background: #f3f3f3; 
+	display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0;}
 
 
 /* HTML: <div class="loader"></div> */
