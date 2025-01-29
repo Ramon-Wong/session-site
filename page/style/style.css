@@ -1,6 +1,20 @@
 /*						stylesheet						*/
 
 
+
+body {
+	font-family: sans-serif; 
+	line-height: 1.5; 
+	min-height: 100vh; 
+	background: #f3f3f3; 
+	display: flex; 
+	flex-direction: column; 
+	justify-content: center; 
+	align-items: center; 
+	margin: 0;
+  }
+
+
 /* HTML: <div class="loader"></div> */
 .loader {
 	--w:10ch; font-weight: bold; font-family: monospace; font-size: 30px; line-height: 2em; letter-spacing: 
