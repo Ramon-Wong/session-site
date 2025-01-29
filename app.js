@@ -1,9 +1,9 @@
-const express                           = require('express');
-const session                           = require('express-session');
-const path                              = require('path');
+const express								= require('express');
+const session								= require('express-session');
+const path									= require('path');
 
-const app                               = express();
-const PORT                              = 3000;
+const app									= express();
+const PORT									= 3000;
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -12,19 +12,25 @@ app.use(session({
 	secret: 'your_secret_key',
 	resave: false,
 	saveUninitialized: true,
-	cookie: { secure: false } // Set to true if using HTTPS
+	cookie: { secure: false }
 }));
-
 
 // Serve static files
 app.use('/script',      express.static(path.join(__dirname, 'page/script')));
 app.use('/style',       express.static(path.join(__dirname, 'page/style')));
-app.get('/', (req, res) => {    res.sendFile(path.join(__dirname, 'page/index.html'));});
 app.listen(PORT, () => {console.log(`Server running on http://localhost:${PORT}`);});
 
 // Hardcoded login credentials
 const USERNAME = "admin";
 const PASSWORD = "password123";
+
+
+// index route
+app.get('/', (req, res) => {
+	console.log("Index page visited");
+	res.sendFile(path.join(__dirname, 'page/index.html'));
+});
+
 
 // Login route
 app.post('/login', (req, res) => {
