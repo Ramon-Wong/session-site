@@ -15,8 +15,15 @@ app.use(session({
 	secret: 'your_secret_key',
 	resave: false,
 	saveUninitialized: true,
-	cookie: { secure: false }
-}));
+	cookie: {	secure: false,
+				maxAge: 60000,	
+				httpOnly: true,
+				sameSite: 'lax'
+			}
+	}));
+
+	
+// app.use((req, res, next) => {	console.log('Session ID:', req.sessionID); next();});
 
 // Serve static files
 app.use('/script',      express.static(path.join(__dirname, 'page/script')));
@@ -28,8 +35,15 @@ const USERNAME = "admin";
 const PASSWORD = "password123";
 
 // index route
-app.get('/', (req, res) => {
-	console.peekaboo("Index page visited");
+app.get('/', (req, res, next) => {
+
+	if(!req.session.viewCount){	
+		req.session.viewCount	= 1;
+	}else{	
+		req.session.viewCount = Number(req.session.viewCount) + 1;
+	}
+
+	console.peekaboo(`Index page visited/view hello sir! ${req.session.viewCount}`);
 	res.sendFile(path.join(__dirname, 'page/index.html'));
 });
 
@@ -61,22 +75,16 @@ app.post('/logout', (req, res) => {
 	});
 });
 
+
 // Middleware to handle SSE clients
-app.get('/events', _setupSSE, (req, res) => {
+// app.get('/events', _setupSSE, (req, res) => {
     
-	console.peekaboo("Setup events and sending...");
-	_sendMessage( app, "hello sir!");
+// 	console.peekaboo("Setup events and sending...");
+	
+// 	req.on('close', () => {		
+// 		req.session.destroy();
+// 		req.app.locals.client = null;
+// 		res.end();
+// 	});	
+// });
 
-	req.on('close', () => {		
-		req.session.destroy();
-		req.app.locals.client = null;
-		res.end();
-	});	
-});
-
-// Example endpoint to trigger an event
-app.post('/send-event', (req, res) => {
-    const message = { text: 'Hello from server!' };
-    connections.forEach(conn => conn.write(`data: ${JSON.stringify(message)}\n\n`));
-    res.sendStatus(200);
-});
