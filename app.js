@@ -59,3 +59,24 @@ app.post('/logout', (req, res) => {
 		res.json({ success: true, message: "Logged out successfully" });
 	});
 });
+
+
+// Middleware to handle SSE clients
+app.get('/events', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    connections.push(res);
+
+    req.on('close', () => {
+        connections = connections.filter(conn => conn !== res);
+    });
+});
+
+// Example endpoint to trigger an event
+app.post('/send-event', (req, res) => {
+    const message = { text: 'Hello from server!' };
+    connections.forEach(conn => conn.write(`data: ${JSON.stringify(message)}\n\n`));
+    res.sendStatus(200);
+});
