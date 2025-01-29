@@ -34,6 +34,7 @@ function _setupSSE(req, res, next){
 	next();
 }
 
+
 function _addPeekaboo() {
 
 	console.peekaboo = (message) =>{

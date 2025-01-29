@@ -5,6 +5,7 @@ const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo}	= require('./utils/fun
 
 const app													= express();
 const PORT													= 3000;
+const sessionLock											= {};
 
 _addPeekaboo();
 
@@ -35,15 +36,15 @@ const USERNAME = "admin";
 const PASSWORD = "password123";
 
 // index route
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
 
-	if(!req.session.viewCount){	
+	if (!req.session.viewCount) {	
 		req.session.viewCount	= 1;
 	}else{	
-		req.session.viewCount = Number(req.session.viewCount) + 1;
+		req.session.viewCount  += 1; // Ensure it's a number
 	}
 
-	console.peekaboo(`Index page visited/view hello sir! ${req.session.viewCount}`);
+	console.peekaboo(`Index page visited ${req.session.viewCount}`);
 	res.sendFile(path.join(__dirname, 'page/index.html'));
 });
 
@@ -76,15 +77,14 @@ app.post('/logout', (req, res) => {
 });
 
 
-// Middleware to handle SSE clients
-// app.get('/events', _setupSSE, (req, res) => {
-    
-// 	console.peekaboo("Setup events and sending...");
-	
-// 	req.on('close', () => {		
-// 		req.session.destroy();
-// 		req.app.locals.client = null;
-// 		res.end();
-// 	});	
-// });
+app.get('/events', _setupSSE, (req, res) => {
 
+	// when refreshed/logout
+	console.peekaboo('Setup SSE Events');
+	_sendMessage( app, "this is a message");
+	req.on('close', () => {		
+		// req.session.destroy();
+		req.app.locals.client = null;
+		res.end();
+	});
+});
