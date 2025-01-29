@@ -1,9 +1,12 @@
-const express								= require('express');
-const session								= require('express-session');
-const path									= require('path');
+const express												= require('express');
+const session												= require('express-session');
+const path													= require('path');
+const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo}	= require('./utils/functions.js');
 
-const app									= express();
-const PORT									= 3000;
+const app													= express();
+const PORT													= 3000;
+
+_addPeekaboo();
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -24,13 +27,11 @@ app.listen(PORT, () => {console.log(`Server running on http://localhost:${PORT}`
 const USERNAME = "admin";
 const PASSWORD = "password123";
 
-
 // index route
 app.get('/', (req, res) => {
-	console.log("Index page visited");
+	console.peekaboo("Index page visited");
 	res.sendFile(path.join(__dirname, 'page/index.html'));
 });
-
 
 // Login route
 app.post('/login', (req, res) => {
@@ -60,18 +61,17 @@ app.post('/logout', (req, res) => {
 	});
 });
 
-
 // Middleware to handle SSE clients
-app.get('/events', (req, res) => {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+app.get('/events', _setupSSE, (req, res) => {
     
-    connections.push(res);
+	console.peekaboo("Setup events and sending...");
+	_sendMessage( app, "hello sir!");
 
-    req.on('close', () => {
-        connections = connections.filter(conn => conn !== res);
-    });
+	req.on('close', () => {		
+		req.session.destroy();
+		req.app.locals.client = null;
+		res.end();
+	});	
 });
 
 // Example endpoint to trigger an event
