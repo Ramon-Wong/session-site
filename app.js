@@ -73,8 +73,8 @@ app.post('/logout', (req, res) => {
 app.get('/events', _setupSSE, (req, res) => {
 
 	// when refreshed/logout
-
 	console.peekaboo('Setup SSE Events');
+	_sendMessage( app, "this is a message");
 	req.on('close', () => {		
 		// req.session.destroy();
 		req.app.locals.client = null;
