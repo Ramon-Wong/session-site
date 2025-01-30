@@ -3,6 +3,7 @@
 body { font-family: sans-serif; line-height: 1.5; min-height: 100vh; background: #f3f3f3; 
 	display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0;}
 
+#app { justify-content: center;}
 
 label, input, button { width: 100%;}
 label, input { display: block; }
@@ -30,4 +31,17 @@ button { border-radius: 10px; margin-top: 15px; margin-bottom: 15px; border: non
 		  calc( 0*var(--w) + 0.1px) 0 #000,calc(-1*var(--w)) 0.01em #000,calc(-2*var(--w) - 0.2px) 0 #000,calc(-3*var(--w) + 0.1px) 0.01em #000,calc(-4*var(--w)) -0.01em #000, 
 		  calc(-5*var(--w) - 0.1px) 0 #000,calc(-6*var(--w) - 0.2px) 0.015em #000,calc(-7*var(--w) - 0.1px) 0.02em #000,calc(-8*var(--w)) -0.01em #000,calc(-9*var(--w) + 0.2px) -0.01em #000;
 	}
+  }
+
+    /* HTML: <div class="dots"></div> */
+.dots-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100px;}
+
+.dots {
+	height: 15px;
+	aspect-ratio: 5;
+	background: radial-gradient(closest-side at 37.5% 50%,#000 94%,#0000) 0/calc(80%/3) 100%;
+	animation: l47 .75s infinite;
+  }
+  @keyframes l47 {
+	100% {background-position: 36.36%}
   }

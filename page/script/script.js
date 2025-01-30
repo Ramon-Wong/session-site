@@ -11,7 +11,26 @@ function listenToServer() {
 	};
 
 	eventSource.onerror = (err) => {
+
+		const appDiv = document.getElementById('app');	
+		appDiv.innerHTML = `<div class="dots-container">
+								<h3>Server Down / Network Disconnected</h3>
+								<div class="dots"></div>
+							</div>`;
+
 		console.error("EventSource Error:", err);
+		eventSource.close();			// Close old connection
+
+        setTimeout(() => {				// Try reconnecting after a delay
+			console.log("[Client] Attempting to reconnect...");
+			fetch('/ping') // A simple API to check if the server is back
+				.then(() => {
+					console.log("[Client] Server is back! Refreshing...");
+					location.reload(); // Refresh the page
+				}).catch(() => {
+					listenToServer(); // Try connecting again if still down
+                });
+        }, 4000);
 	};
 }
 
@@ -101,5 +120,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 		console.error("[Client] Auth check failed:", error);
 		loadLoginPage();
 	}
-
 });
