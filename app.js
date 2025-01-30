@@ -2,10 +2,18 @@ const express																= require('express');
 const session																= require('express-session');
 const path																	= require('path');
 const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo, _Authenticated}	= require('./utils/functions.js');
+const rateLimit																= require('express-rate-limit');
 
-const app																	= express();
-const PORT																	= 3000;
-const sessionLock															= {};
+const app			= express();
+const PORT			= 3000;
+const sessionLock	= {};
+const loginLimiter	= rateLimit({ 
+	windowMs: 15 * 60 * 1000,
+	max: 5, 															// Limit each IP to 5 login requests per window
+	message: { success: false, message: "Too many login attempts. Please try again later." },
+	standardHeaders: true,												// Send rate limit headers
+	legacyHeaders: false,												// Disable X-RateLimit headers	
+});
 
 _addPeekaboo();
 
@@ -16,6 +24,7 @@ app.use(session({
 		secret: 'your_secret_key',
 		resave: false,
 		saveUninitialized: true,
+		cookie: { maxAge: 15 * 60 * 1000 }								// 15 mins
 	}));
 
 // app.use((req, res, next) => {	console.log('Session ID:', req.sessionID); next();});
@@ -43,7 +52,7 @@ app.get('/', (req, res) => {
 });
 
 // Login route
-app.post('/login', (req, res) => {
+app.post('/login', loginLimiter, (req, res) => {
 	const { username, password } = req.body;	
 	console.peekaboo(`Received login request: ${username}`);
 
@@ -66,10 +75,12 @@ app.get('/dashboard', _Authenticated, (req, res) => {
 	}
 });
 
+
 // Logout route
 app.post('/logout', (req, res) => {
-	req.session.destroy(err => {
+	req.session.destroy(err => {		
 		if(err){return res.status(500).json({ message: "Logout failed" });}
+		console.peekaboo('success log out');
 		res.json({ success: true, message: "Logged out successfully", action: "redirect_login"});
 	});
 });

@@ -30,7 +30,6 @@ function _setupSSE(req, res, next){
 	res.setHeader('Connection', 'keep-alive');
 
 	req.app.locals.client = (message) => {res.write(`data: ${JSON.stringify(message)}\n\n`);};
-	
 	next();
 }
 
@@ -40,8 +39,17 @@ function _addPeekaboo() {
 	console.peekaboo = (message) =>{
 		const error = new Error();
 		const stack = error.stack.split('\n')[2].trim();
-		console.log(`${stack}\t\t >> ${message}`);
-	}
+		const match = stack.match(/\((.*):(\d+):(\d+)\)/);
+
+		if(match){
+			const filename = match[1];
+			const line = match[2];
+			const column = match[3];
+			console.log(`at ${filename}:${line}:${column}\t\t\t >> ${message}`);
+		}else{
+			console.log(`${stack}\t\t\t >> ${message}`);
+		}
+	}	
 }
 
 

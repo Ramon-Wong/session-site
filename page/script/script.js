@@ -1,11 +1,13 @@
 
 
+
 function listenToServer() {
+
 	const eventSource = new EventSource('/events');
 
 	eventSource.onmessage = function(event) {		
 		const message = JSON.parse(event.data);
-		console.log(`received message: ${message}`);
+		console.log(`[Client] received message: ${message}`);
 	};
 
 	eventSource.onerror = (err) => {
@@ -14,35 +16,8 @@ function listenToServer() {
 }
 
 
-function loadDashboard() {	
-	const appDiv = document.getElementById('app');
-	appDiv.outerHTML = `<div id='app'><h2>Dashboard</h2>
-						<button id="logoutButton">Logout</button></div>`;
-
-	console.log("[Client] Dashboard loaded. Listening to server events...");
-	listenToServer();
-
-	document.getElementById('logoutButton').addEventListener('click', async () => {
-		console.log("[Client] Logout button clicked.");
-		try{
-			const response = await fetch('/logout', { method: 'POST' });
-			const result = await response.json();
-
-			if(result.success) {
-				console.log("[Client] Successfully logged out. Redirecting to login page...");
-				loadLoginPage();
-			}else{
-				console.error("[Client] Logout failed:", result.message);
-			}
-		}catch(error){
-			console.error("[Client] Logout error:", error);
-		}
-	});
-}
-
-
 function loadLoginPage() {
-	const appDiv = document.getElementById('app');
+	const appDiv = document.getElementById('app');	
 	appDiv.outerHTML = `<div id='app'><h2>Login</h2>
 							<form id="loginForm">
 								<label for="username">Username:</label>
@@ -79,7 +54,36 @@ function loadLoginPage() {
 }
 
 
+function loadDashboard() {	
+	const appDiv = document.getElementById('app');
+	appDiv.outerHTML = `<div id='app'><h2>Dashboard</h2>
+						<button id="logoutButton">Logout</button></div>`;
+
+	console.log("[Client] Dashboard loaded. Listening to server events...");
+	listenToServer();
+
+	document.getElementById('logoutButton').addEventListener('click', async () => {
+		console.log("[Client] Logout button clicked.");
+		try{
+			const response = await fetch('/logout', { method: 'POST' });
+			const result = await response.json();
+
+			if(result.success) {
+				console.log("[Client] Successfully logged out. Redirecting to login page...");
+				loadLoginPage();
+			}else{
+				console.error("[Client] Logout failed:", result.message);
+			}
+		}catch(error){
+			console.error("[Client] Logout error:", error);
+		}
+	});
+}
+
+
 document.addEventListener('DOMContentLoaded', async () => {
+
+	const appDiv = document.getElementById('app');
 
 	try{
 		const response = await fetch('/check-auth');
@@ -97,4 +101,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 		console.error("[Client] Auth check failed:", error);
 		loadLoginPage();
 	}
+
 });
