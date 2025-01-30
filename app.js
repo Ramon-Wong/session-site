@@ -1,11 +1,11 @@
-const express												= require('express');
-const session												= require('express-session');
-const path													= require('path');
-const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo}	= require('./utils/functions.js');
+const express																= require('express');
+const session																= require('express-session');
+const path																	= require('path');
+const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo, _Authenticated}	= require('./utils/functions.js');
 
-const app													= express();
-const PORT													= 3000;
-const sessionLock											= {};
+const app																	= express();
+const PORT																	= 3000;
+const sessionLock															= {};
 
 _addPeekaboo();
 
@@ -27,7 +27,7 @@ app.listen(PORT, () => {console.log(`Server running on http://localhost:${PORT}`
 
 // Hardcoded login credentials
 const USERNAME = "admin";
-const PASSWORD = "password123";
+const PASSWORD = "password12345";
 
 // index route
 app.get('/', (req, res) => {
@@ -44,14 +44,21 @@ app.get('/', (req, res) => {
 
 // Login route
 app.post('/login', (req, res) => {
-    console.peekaboo(`Received login request: ${req.body}`); 
-	const { username, password } = req.body;
+	const { username, password } = req.body;	
+	console.peekaboo(`Received login request: ${username}`);
 
-	res.json({ success: true, message: `Initialize Setup, ${username}!`, action: `setup_wa`});
+	if( username === USERNAME && password === PASSWORD){
+		req.session.user	= { username };
+		console.peekaboo(`success login`);
+		res.json({ success: true,	message: `Initialize Setup, ${username}!`, action: `setup_wa`});
+	}else{
+		console.peekaboo(`failed login`);
+		res.json({ success: false,	message: `Incorrect username/password, ${username}!`, action: `redirect_login`});
+	}
 });
 
 // Protected route example
-app.get('/dashboard', (req, res) => {
+app.get('/dashboard', _Authenticated, (req, res) => {
 	if(req.session.user) {
 		res.json({ message: `Welcome, ${req.session.user}!` });
 	}else{
@@ -63,14 +70,13 @@ app.get('/dashboard', (req, res) => {
 app.post('/logout', (req, res) => {
 	req.session.destroy(err => {
 		if(err){return res.status(500).json({ message: "Logout failed" });}
-		res.json({ success: true, message: "Logged out successfully" });
+		res.json({ success: true, message: "Logged out successfully", action: "redirect_login"});
 	});
 });
 
 
-app.get('/events', _setupSSE, (req, res) => {
-
-	// when refreshed/logout
+app.get('/events', _setupSSE, (req, res) => {				// when refreshed 
+	
 	console.peekaboo('Setup SSE Events');
 	_sendMessage( app, 'Welcome to the main page');
 	req.on('close', () => {		
@@ -78,4 +84,10 @@ app.get('/events', _setupSSE, (req, res) => {
 		req.app.locals.client = null;
 		res.end();
 	});
+});
+
+
+app.get('/check-auth', (req, res) => {
+	if(req.session.user){ res.json({ success: true, username: req.session.user.username });
+    }else{ res.json({ success: false });}
 });

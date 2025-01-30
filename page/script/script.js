@@ -1,4 +1,5 @@
 
+
 function listenToServer() {
 	const eventSource = new EventSource('/events');
 
@@ -10,50 +11,90 @@ function listenToServer() {
 	eventSource.onerror = (err) => {
 		console.error("EventSource Error:", err);
 	};
-
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-	const appDiv			= document.getElementById('app');
-	appDiv.outerHTML = `<h2>Login</h2>
-						<form id="loginForm">
-							<label for="first">Username:</label>
-							<input type="text" id="username" name="username" placeholder="Enter your Username" required>
-							<label for="password">Password:</label>
-							<input type="password" id="password" name="password" placeholder="Enter your Password" required>
-							<button type="submit">Submit</button>
-						</form>`;
+function loadDashboard() {	
+	const appDiv = document.getElementById('app');
+	appDiv.outerHTML = `<div id='app'><h2>Dashboard</h2>
+						<button id="logoutButton">Logout</button></div>`;
 
+	console.log("[Client] Dashboard loaded. Listening to server events...");
 	listenToServer();
 
-	const form = document.getElementById('loginForm');
-	form.addEventListener('submit', async (event) => {
-		event.preventDefault();
-		const username			= form.username.value;
-		const password			= form.password.value;
-
+	document.getElementById('logoutButton').addEventListener('click', async () => {
+		console.log("[Client] Logout button clicked.");
 		try{
-			const response = await fetch('/login', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password }),
-			});
-			
+			const response = await fetch('/logout', { method: 'POST' });
 			const result = await response.json();
-			if(result.success){
-				console.log("this is a success");
+
+			if(result.success) {
+				console.log("[Client] Successfully logged out. Redirecting to login page...");
+				loadLoginPage();
 			}else{
-				console.log(result.message);
-				form.username.value		= '';
-				form.password.value		= '';
+				console.error("[Client] Logout failed:", result.message);
 			}
-		}catch (error) {
-			console.error('Login error:', error);
+		}catch(error){
+			console.error("[Client] Logout error:", error);
 		}
 	});
+}
 
 
+function loadLoginPage() {
+	const appDiv = document.getElementById('app');
+	appDiv.outerHTML = `<div id='app'><h2>Login</h2>
+							<form id="loginForm">
+								<label for="username">Username:</label>
+								<input type="text" id="username" name="username" required>
+								<label for="password">Password:</label>
+								<input type="password" id="password" name="password" required>
+							<button type="submit">Submit</button>
+						</form></div>`;
 
+	console.log("[Client] Login page loaded.");
+	listenToServer();
+
+	document.getElementById('loginForm').addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const username = event.target.username.value;
+		const password = event.target.password.value;
+
+		console.log("[Client] Attempting to log in as:", username);
+
+		try{const response = await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password })});
+			const result = await response.json();
+            if(result.success){
+				console.log("[Client] Login successful! Loading dashboard...");
+				loadDashboard();
+            }else{
+				console.log("[Client] Login failed:", result.message);
+				event.target.username.value = '';
+				event.target.password.value = '';
+			}
+		}catch(error){
+			console.error("[Client] Login error:", error);
+		}
+	});
+}
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+	try{
+		const response = await fetch('/check-auth');
+		const result = await response.json();
+
+		if (result.success) {
+			console.log("[Client] User is authenticated. Loading dashboard...");
+			loadDashboard();
+		} else {
+			console.log("[Client] User not authenticated. Redirecting to login...");
+			loadLoginPage();
+		}
+
+	}catch(error){
+		console.error("[Client] Auth check failed:", error);
+		loadLoginPage();
+	}
 });
-
