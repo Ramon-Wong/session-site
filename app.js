@@ -13,17 +13,11 @@ _addPeekaboo();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
-	secret: 'your_secret_key',
-	resave: false,
-	saveUninitialized: true,
-	cookie: {	secure: false,
-				maxAge: 60000,	
-				httpOnly: true,
-				sameSite: 'lax'
-			}
+		secret: 'your_secret_key',
+		resave: false,
+		saveUninitialized: true,
 	}));
 
-	
 // app.use((req, res, next) => {	console.log('Session ID:', req.sessionID); next();});
 
 // Serve static files
@@ -50,13 +44,10 @@ app.get('/', (req, res) => {
 
 // Login route
 app.post('/login', (req, res) => {
+    console.peekaboo(`Received login request: ${req.body}`); 
 	const { username, password } = req.body;
-	if(username === USERNAME && password === PASSWORD){
-		req.session.user = username;
-		res.json({ success: true, message: "Login successful" });
-	}else{
-		res.json({ success: false, message: "Invalid credentials" });
-	}
+
+	res.json({ success: true, message: `Initialize Setup, ${username}!`, action: `setup_wa`});
 });
 
 // Protected route example
@@ -81,7 +72,7 @@ app.get('/events', _setupSSE, (req, res) => {
 
 	// when refreshed/logout
 	console.peekaboo('Setup SSE Events');
-	_sendMessage( app, "this is a message");
+	_sendMessage( app, 'Welcome to the main page');
 	req.on('close', () => {		
 		// req.session.destroy();
 		req.app.locals.client = null;
