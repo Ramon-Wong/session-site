@@ -58,10 +58,15 @@ function loadLoginPage() {
 
 		try{const response = await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password })});
 			const result = await response.json();
-            if(result.success){
+			if(result.success){
 				console.log("[Client] Login successful! Loading dashboard...");
 				loadDashboard();
-            }else{
+			}else{
+
+				const appDiv = document.getElementById('app');
+				appDiv.classList.add('shake');
+				setTimeout(() => { appDiv.classList.remove('shake'); }, 300); 
+
 				console.log("[Client] Login failed:", result.message);
 				event.target.username.value = '';
 				event.target.password.value = '';

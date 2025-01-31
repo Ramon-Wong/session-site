@@ -4,8 +4,7 @@ const path																	= require('path');
 const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo, _Authenticated}	= require('./utils/functions.js');
 const rateLimit																= require('express-rate-limit');
 
-const	dataPath															= path.join(__dirname, 'data', 'users.json');
-
+const dataPath		= path.join(__dirname, 'data', 'users.json');
 const app			= express();
 const PORT			= 3000;
 const sessionLock	= {};
