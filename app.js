@@ -4,16 +4,18 @@ const path																	= require('path');
 const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo, _Authenticated}	= require('./utils/functions.js');
 const rateLimit																= require('express-rate-limit');
 
+const	dataPath															= path.join(__dirname, 'data', 'users.json');
+
 const app			= express();
 const PORT			= 3000;
 const sessionLock	= {};
 const loginLimiter	= rateLimit({ 
-	windowMs: 15 * 60 * 1000,
-	max: 5, 															// Limit each IP to 5 login requests per window
-	message: { success: false, message: "Too many login attempts. Please try again later." },
-	standardHeaders: true,												// Send rate limit headers
-	legacyHeaders: false,												// Disable X-RateLimit headers	
-});
+			windowMs: 15 * 60 * 1000,
+			max: 5, 													// Limit each IP to 5 login requests per window
+			message: { success: false, message: "Too many login attempts. Please try again later." },
+			standardHeaders: true,										// Send rate limit headers
+			legacyHeaders: false,										// Disable X-RateLimit headers	
+		});
 
 _addPeekaboo();
 
@@ -56,14 +58,26 @@ app.post('/login', loginLimiter, (req, res) => {
 	const { username, password } = req.body;	
 	console.peekaboo(`Received login request: ${username}`);
 
-	if( username === USERNAME && password === PASSWORD){
-		req.session.user	= { username };
-		console.peekaboo(`success login`);
-		res.json({ success: true,	message: `Initialize Setup, ${username}!`, action: `setup_wa`});
-	}else{
-		console.peekaboo(`failed login`);
-		res.json({ success: false,	message: `Incorrect username/password, ${username}!`, action: `redirect_login`});
-	}
+
+	_readJSON(dataPath)
+		.then((users) => {
+			const { username, password } = req.body; 													// Get submitted data			
+			const user = users.find((u) => u.username === username && u.password === password);			// Find a matching user			
+
+			if(user){
+				console.peekaboo(`Your Username/password is Valid`);
+				req.session.user	= { username };
+				res.json({ success: true,	message: `Initialize Setup, ${username}!`, action: `setup_wa`});				
+			}else{
+				console.peekaboo(`Your Username/password is Wrong`);
+				res.json({ success: false,	message: `Incorrect username/password, ${username}!`, action: `redirect_login`});
+			}
+		})
+		.catch((err) => {
+			console.error('Error reading JSON:', err);													// Handle errors (e.g., file not found, JSON parsing errors)
+			res.status(500).send('Server error. Please try again later.');
+		});	
+
 });
 
 // Protected route example

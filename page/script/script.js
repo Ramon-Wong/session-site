@@ -23,12 +23,12 @@ function listenToServer() {
 
         setTimeout(() => {				// Try reconnecting after a delay
 			console.log("[Client] Attempting to reconnect...");
-			fetch('/ping') // A simple API to check if the server is back
+			fetch('/ping')				// A simple API to check if the server is back
 				.then(() => {
 					console.log("[Client] Server is back! Refreshing...");
-					location.reload(); // Refresh the page
+					location.reload();	// Refresh the page
 				}).catch(() => {
-					listenToServer(); // Try connecting again if still down
+					listenToServer();	// Try connecting again if still down
                 });
         }, 4000);
 	};
