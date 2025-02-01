@@ -4,7 +4,7 @@ const path																	= require('path');
 const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo, _Authenticated}	= require('./utils/functions.js');
 const rateLimit																= require('express-rate-limit');
 const { _whatsApp, emitter, setup_Shutdown, _event}							= require('./utils/whatsapp-0.2.js');
-
+const QRCode																= require('qrcode');
 
 const dataPath		= path.join(__dirname, 'data', 'users.json');
 const app			= express();
@@ -148,13 +148,13 @@ emitter.on( _event[3], 		 (msg)	=> { console.peekaboo(`Incoming message: ${msg}`
 emitter.on( _event[4], 			()	=> { console.peekaboo(`Disconnected`);});							// Disconnected
 
 
-emitter.on( _event[0], 	( qrCode)	=> { 																// QR
+emitter.on( _event[0], 			(qrCode)	=> { 																// QR
 
+	console.peekaboo(`QR Code received from emitter`);
 	QRCode.toDataURL(  qrCode, (err , url) =>{
 		if(err){	console.error('Error generating QR code:', err); return; }
 
 		console.peekaboo(`QR Code received in Express: ... Sending it to Mars`);
 		_sendMessage( app, { message: `QRCODE is ready!`, QRCODE: url, count: wa_client.qrCount});
 	});
-
 });

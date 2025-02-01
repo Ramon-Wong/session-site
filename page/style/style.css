@@ -3,7 +3,7 @@
 body { font-family: sans-serif; line-height: 1.5; min-height: 100vh; background: #f3f3f3; 
 	display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 0;}
 
-#app { 	width: 250px; padding: 20px; text-align: center; border: 1px solid #9d9d9d; background: #FDFDFD;}
+#app { 	width: 250px; padding: 20px; text-align: center; border: 1px solid #9d9d9d; background: #FDFDFD; display: }
 #app, button { border-radius: 10px;}
 
 label, input, button { width: 100%;}
@@ -56,3 +56,19 @@ button { margin-top: 15px; margin-bottom: 15px; border: none; color: white; curs
   @keyframes l47 {
 	100% {background-position: 36.36%}
   }
+
+
+  /* HTML: <div class="loader"></div> */
+.spinner {	width: 50px; aspect-ratio: 1; display: grid; border-radius: 50%; 
+	margin: 0 auto;
+	background:
+	  linear-gradient(0deg ,rgb(0 0 0/50%) 30%,#0000 0 70%,rgb(0 0 0/100%) 0) 50%/8% 100%,
+	  linear-gradient(90deg,rgb(0 0 0/25%) 30%,#0000 0 70%,rgb(0 0 0/75% ) 0) 50%/100% 8%;
+	background-repeat: no-repeat;
+	animation: l23 1s infinite steps(12);
+  }
+
+.spinner::before,
+.spinner::after { content: ""; grid-area: 1/1; border-radius: 50%; background: inherit; opacity: 0.915; transform: rotate(30deg);}
+.spinner::after { opacity: 0.83; transform: rotate(60deg);}
+@keyframes l23 { 100% {transform: rotate(1turn)} }

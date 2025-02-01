@@ -112,8 +112,15 @@ function loadDashboard() {
 			const response = await fetch('/wa_initialize', { method: 'POST' });
 			const result = await response.json();
 
+			const oldElem		= document.getElementById('wa_initialize');
+			const newDiv		= document.createElement('div');
+			newDiv.id			= 'wa_initialized'; // New id if needed
+			newDiv.className	= 'spinner';
+			newDiv.textContent	= '';
+			oldElem.parentNode.replaceChild(newDiv, oldElem);
+
 			if(result.success) {
-				console.log("[Client] whatsapp initialize success...");
+				console.log("[Client] whatsapp initialize requested");
 			}else{
 				console.error("[Client] whatsapp initialize success...", result.message);
 			}
@@ -121,12 +128,6 @@ function loadDashboard() {
 			console.error("[Client] Logout error:", error);
 		}
 	});
-
-
-
-
-
-
 
 }
 
