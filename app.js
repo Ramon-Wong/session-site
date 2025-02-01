@@ -142,10 +142,12 @@ app.post('/wa_initialize', (req, res) => {
 
 // const _event	= ['qr','ready','authenticated','message','disconnected'];
 
-emitter.on( _event[1], 			()	=> { console.peekaboo(`User Whatsapp Setup is Ready`);});			// ready
-emitter.on( _event[2], 			()	=> { console.peekaboo(`User Account Is Already Authenticated`);});	// Authenticated
-emitter.on( _event[3], 		 (msg)	=> { console.peekaboo(`Incoming message: ${msg}`);});				// incoming message
-emitter.on( _event[4], 			()	=> { console.peekaboo(`Disconnected`);});							// Disconnected
+
+
+emitter.on( _event[1], 		()	=> { console.peekaboo(`User Whatsapp Setup is Ready`);	_sendMessage( app, { message: `user is ready!`,			READY: true});});
+emitter.on( _event[2], 		()	=> { console.peekaboo(`User Is Authenticated`);			_sendMessage( app, { message: `user is authenticated!`, AUTH: true});});
+emitter.on( _event[3], 	 (msg)	=> { console.peekaboo(`Incoming message: ${msg}`);});				// incoming message
+emitter.on( _event[4], 		()	=> { console.peekaboo(`Disconnected`);});							// Disconnected
 
 
 emitter.on( _event[0], 			(qrCode)	=> { 																// QR
@@ -158,3 +160,4 @@ emitter.on( _event[0], 			(qrCode)	=> { 																// QR
 		_sendMessage( app, { message: `QRCODE is ready!`, QRCODE: url, count: wa_client.qrCount});
 	});
 });
+
