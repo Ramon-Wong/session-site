@@ -81,7 +81,9 @@ function loadLoginPage() {
 function loadDashboard() {	
 	const appDiv = document.getElementById('app');
 	appDiv.outerHTML = `<div id='app'><h2>Dashboard</h2>
-						<button id="logoutButton">Logout</button></div>`;
+						<button id="wa_initialize">Initialize</button>
+						<button id="logoutButton">Logout</button>
+						</div>`;
 
 	console.log("[Client] Dashboard loaded. Listening to server events...");
 	listenToServer();
@@ -102,6 +104,30 @@ function loadDashboard() {
 			console.error("[Client] Logout error:", error);
 		}
 	});
+
+
+	document.getElementById('wa_initialize').addEventListener('click', async () => {
+		console.log("[Client] wa initialize.");
+		try{
+			const response = await fetch('/wa_initialize', { method: 'POST' });
+			const result = await response.json();
+
+			if(result.success) {
+				console.log("[Client] whatsapp initialize success...");
+			}else{
+				console.error("[Client] whatsapp initialize success...", result.message);
+			}
+		}catch(error){
+			console.error("[Client] Logout error:", error);
+		}
+	});
+
+
+
+
+
+
+
 }
 
 

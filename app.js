@@ -3,11 +3,12 @@ const session																= require('express-session');
 const path																	= require('path');
 const { _readJSON, _sendMessage, _setupSSE, _addPeekaboo, _Authenticated}	= require('./utils/functions.js');
 const rateLimit																= require('express-rate-limit');
+const { _whatsApp, emitter, setup_Shutdown, _event}							= require('./utils/whatsapp-0.2.js');
+
 
 const dataPath		= path.join(__dirname, 'data', 'users.json');
 const app			= express();
 const PORT			= 3000;
-const sessionLock	= {};
 const loginLimiter	= rateLimit({ 
 			windowMs: 15 * 60 * 1000,
 			max: 5, 													// Limit each IP to 5 login requests per window
@@ -15,6 +16,19 @@ const loginLimiter	= rateLimit({
 			standardHeaders: true,										// Send rate limit headers
 			legacyHeaders: false,										// Disable X-RateLimit headers	
 		});
+
+
+const	wa_client	= _whatsApp();
+
+setup_Shutdown(() => {
+	console.peekaboo("elegant way to release stuff");
+
+	wa_client.destroy( 
+		() => {console.peekaboo("trying to destroy wa_client, elegantly");}, 
+		() => {console.peekaboo("failed trying to destroy wa_client, elegantly");}
+	);	
+});
+
 
 _addPeekaboo();
 
@@ -106,4 +120,41 @@ app.get('/events', _setupSSE, (req, res) => {				// when refreshed
 app.get('/check-auth', (req, res) => {
 	if(req.session.user){ res.json({ success: true, username: req.session.user.username });
     }else{ res.json({ success: false });}
+});
+
+
+app.post('/wa_initialize', (req, res) => {
+	console.peekaboo('Setting up wa_initialization');
+
+	if(req.session && req.session.user) {
+		wa_client.initialize( 							// Setting up Whatapp client	
+			() => { console.peekaboo("Whatsapp client, initialize!");},
+			() => { console.peekaboo("Fail to initialize Whatsapp client");}
+		);
+
+		res.json({ success: true, message: 'wa_initialize' });
+	}else{
+		res.json({ success: false });
+	}
+
+});
+
+
+// const _event	= ['qr','ready','authenticated','message','disconnected'];
+
+emitter.on( _event[1], 			()	=> { console.peekaboo(`User Whatsapp Setup is Ready`);});			// ready
+emitter.on( _event[2], 			()	=> { console.peekaboo(`User Account Is Already Authenticated`);});	// Authenticated
+emitter.on( _event[3], 		 (msg)	=> { console.peekaboo(`Incoming message: ${msg}`);});				// incoming message
+emitter.on( _event[4], 			()	=> { console.peekaboo(`Disconnected`);});							// Disconnected
+
+
+emitter.on( _event[0], 	( qrCode)	=> { 																// QR
+
+	QRCode.toDataURL(  qrCode, (err , url) =>{
+		if(err){	console.error('Error generating QR code:', err); return; }
+
+		console.peekaboo(`QR Code received in Express: ... Sending it to Mars`);
+		_sendMessage( app, { message: `QRCODE is ready!`, QRCODE: url, count: wa_client.qrCount});
+	});
+
 });
