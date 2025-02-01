@@ -7,7 +7,19 @@ function listenToServer() {
 
 	eventSource.onmessage = function(event) {		
 		const message = JSON.parse(event.data);
-		console.log(`[Client] received message: ${message}`);
+
+		if(message.READY	&& message.message == 'user is ready!'){			console.log("[Client][Ready]");}
+		if(message.AUTH		&& message.message == 'user is authenticated!'){	console.log("[Client][Authenticated]");}
+		if(message.QRCODE	&& message.message == 'QRCODE is ready!'){
+			console.log("[Client] We got QRCode and posting it");
+			const element = document.getElementById('wa_initialize');
+			// element.outerHTML = `<img id="wa_initialize" src="${message.QRCODE}" alt="QR Code"></img>`;
+			if (element) {
+				element.outerHTML = `<img id="wa_initialize" src="${message.QRCODE}" alt="QR Code">`;
+			} else {
+				console.error("Element with ID 'wa_initialize' not found.");
+			}			
+		}
 	};
 
 	eventSource.onerror = (err) => {
@@ -114,7 +126,7 @@ function loadDashboard() {
 
 			const oldElem		= document.getElementById('wa_initialize');
 			const newDiv		= document.createElement('div');
-			newDiv.id			= 'wa_initialized'; // New id if needed
+			newDiv.id			= 'wa_initialize'; // New id if needed
 			newDiv.className	= 'spinner';
 			newDiv.textContent	= '';
 			oldElem.parentNode.replaceChild(newDiv, oldElem);
