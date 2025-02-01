@@ -8,8 +8,19 @@ function listenToServer() {
 	eventSource.onmessage = function(event) {		
 		const message = JSON.parse(event.data);
 
-		if(message.READY	&& message.message == 'user is ready!'){			console.log("[Client][Ready]");}
+		if(message.READY	&& message.message == 'user is ready!'){			
+			console.log("[Client][Ready]");
+			const element = document.getElementById('wa_initialize');
+			// element.outerHTML = `<img id="wa_initialize" src="${message.QRCODE}" alt="QR Code"></img>`;
+			if (element) {
+				element.outerHTML = `<div id="wa_initialize"><h2>Wa Initialize<h2></div>`;
+			} else {
+				console.error("Element with ID 'wa_initialize' not found.");
+			}			
+		}
+
 		if(message.AUTH		&& message.message == 'user is authenticated!'){	console.log("[Client][Authenticated]");}
+
 		if(message.QRCODE	&& message.message == 'QRCODE is ready!'){
 			console.log("[Client] We got QRCode and posting it");
 			const element = document.getElementById('wa_initialize');
